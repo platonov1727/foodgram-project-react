@@ -134,7 +134,8 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.BasicAuthentication'
     ),
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
+        # 'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.AllowAny',
     ]
 }
 
@@ -148,7 +149,6 @@ DJOSER = {
     },
     'HIDE_USERS': False,
     'PERMISSIONS': {
-
         'user': ['rest_framework.permissions.IsAuthenticated'],
         'user_list': ['rest_framework.permissions.AllowAny'],
     },
