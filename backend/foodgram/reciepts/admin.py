@@ -5,7 +5,6 @@ from import_export.fields import Field
 from import_export.admin import ImportExportModelAdmin
 
 
-
 class IngredientsResource(resources.ModelResource):
     name = Field(
         column_name='name', attribute='name',)
@@ -15,8 +14,7 @@ class IngredientsResource(resources.ModelResource):
 
     class Meta:
         model = Ingredient
-        fields = ('id','name', 'measurement_unit')
-
+        fields = ('id', 'name', 'measurement_unit')
 
 
 @admin.register(Ingredient)
