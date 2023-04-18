@@ -1,6 +1,6 @@
 from django.contrib import admin
 from reciepts.models import Ingredient, Tag
-from import_export import resources, widgets
+from import_export import resources
 from import_export.fields import Field
 from import_export.admin import ImportExportModelAdmin
 
@@ -23,3 +23,5 @@ class IngredientAdmin(ImportExportModelAdmin):
     list_display = ('name', 'measurement_unit',)
     search_fields = ('name',)
     empty_value_display = '-пусто-'
+
+admin.site.register(Tag)

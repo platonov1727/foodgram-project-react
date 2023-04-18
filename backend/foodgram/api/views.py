@@ -1,13 +1,13 @@
 from api.serializers import TagSerializer, IngredientSerializer
 from reciepts.models import Tag, Ingredient
-from rest_framework.viewsets import ViewSet
+from rest_framework.viewsets import ModelViewSet
 
 
-class TagAPIView(ViewSet):
+class TagAPIView(ModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
 
 
-class IngredientAPIView(ViewSet):
+class IngredientAPIView(ModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer

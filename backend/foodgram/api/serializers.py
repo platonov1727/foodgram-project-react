@@ -1,16 +1,18 @@
 from reciepts.models import Ingredient, Tag
-from rest_framework import serializers
+from rest_framework.serializers import ModelSerializer, ReadOnlyField, ManyRelatedField
 
 
-class TagSerializer(serializers.ModelSerializer):
+class TagSerializer(ModelSerializer):
 
     class Meta:
         model = Tag
-        fields = ('name', 'color')
+        fields = '__all__'
+        read_only_fields = ('__all__', )
 
 
-class IngredientSerializer(serializers.ModelSerializer):
+class IngredientSerializer(ModelSerializer):
 
     class Meta:
         model = Ingredient
-        fields = ('name', 'measurement_unit')
+        fields = '__all__'
+        read_only_fields = ('__all__', )

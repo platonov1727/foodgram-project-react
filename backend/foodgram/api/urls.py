@@ -4,11 +4,11 @@ from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
 router.register(r'ingredients', IngredientAPIView)
-router.register(r'tag', TagAPIView)
+router.register(r'tags', TagAPIView)
 
 
 urlpatterns = [
     path(r'', include('djoser.urls')),
     re_path(r'auth/', include('djoser.urls.authtoken')),
-    path('ingredients/', include(router.urls)),
+    path('', include(router.urls)),
 ]
