@@ -1,5 +1,5 @@
 from django.contrib import admin
-from reciepts.models import Ingredient, Tag
+from reciepts.models import Ingredient, Tag, IngredientRecipe, Recipe, Favorite
 from import_export import resources
 from import_export.fields import Field
 from import_export.admin import ImportExportModelAdmin
@@ -24,4 +24,8 @@ class IngredientAdmin(ImportExportModelAdmin):
     search_fields = ('name',)
     empty_value_display = '-пусто-'
 
+
 admin.site.register(Tag)
+admin.site.register(IngredientRecipe)
+admin.site.register(Recipe)
+admin.site.register(Favorite)

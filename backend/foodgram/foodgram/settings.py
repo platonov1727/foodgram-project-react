@@ -40,8 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
-    'djoser',
     'users',
+    'djoser',
     'api',
     'reciepts',
     'import_export',
@@ -141,7 +141,9 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         # 'rest_framework.permissions.IsAuthenticated',
         'rest_framework.permissions.AllowAny',
-    ]
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10
 }
 
 
@@ -161,3 +163,4 @@ DJOSER = {
 
 
 IMPORT_EXPORT_USE_TRANSACTIONS = True
+AUTH_USER_MODEL = 'users.User'
