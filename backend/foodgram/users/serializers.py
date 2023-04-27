@@ -5,7 +5,7 @@ from users.models import User
 
 
 class UserRegistrationSerializer(BaseUserRegistrationSerializer):
-    # recipes = PrimaryKeyRelatedField(many=True, read_only=True)
+    recipes = PrimaryKeyRelatedField(many=True, read_only=True)
 
     class Meta(BaseUserRegistrationSerializer.Meta):
         model = User

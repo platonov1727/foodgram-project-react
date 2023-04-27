@@ -1,13 +1,15 @@
 
+from django.http import HttpResponse
 from api.serializers import (FavoriteRecipeSerializer, IngredientSerializer,
                              RecipeCreateSerializer, RecipeSerializer,
                              TagSerializer)
-from reciepts.models import Favorite, Ingredient, Recipe, Tag
+from reciepts.models import Favorite, Ingredient, Recipe, Tag, Carts
 from rest_framework import status
-from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.response import Response
+from rest_framework import status
 
 
 class TagAPIView(ModelViewSet):
@@ -51,3 +53,43 @@ class FavoriteRecipeView(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
         favorite_recipe.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class AddToCartView(APIView):
+    def post(self, request, recipe_id):
+        try:
+            recipe = Recipe.objects.get(id=recipe_id)
+            cart = Carts.objects.create(recipe=recipe, user=request.user)
+            cart.save()
+            return Response(status=status.HTTP_201_CREATED)
+        except Recipe.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+class RemoveFromCartView(APIView):
+    def delete(self, request, recipe_id):
+        try:
+            cart = Carts.objects.get(recipe_id=recipe_id, user=request.user)
+            cart.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Carts.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+class DownloadShoppingCartView(APIView):
+    def get(self, request):
+        carts = Carts.objects.filter(user=request.user).all()
+        ingredients_dict = {}
+        for cart in carts:
+            ingredients = cart.recipe.ingredients.all()
+            for ingredient in ingredients:
+                if ingredient.name in ingredients_dict:
+                    ingredients_dict[ingredient.name] += ingredient.amount
+                else:
+                    ingredients_dict[ingredient.name] = ingredient.amount
+        file_contents = ''
+        for name, amount in ingredients_dict.items():
+            file_contents += f'{name} - {amount}\n'
+        response = HttpResponse(file_contents, content_type='text/plain')
+        response['Content-Disposition'] = 'attachment; filename=shopping_cart.txt'
+        return response

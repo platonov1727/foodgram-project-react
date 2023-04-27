@@ -1,6 +1,5 @@
 
-from reciepts.models import (
-    Favorite, Ingredient, IngredientRecipe, Recipe, Tag)
+from reciepts.models import Favorite, Ingredient, IngredientRecipe, Recipe, Tag
 from rest_framework import serializers
 from users.serializers import UserRegistrationSerializer
 
@@ -54,7 +53,8 @@ class RecipeSerializer(serializers.ModelSerializer):
     def get_is_favorite(self, obj):
         request = self.context.get('request')
         if request and request.user.is_authenticated:
-            return Favorite.objects.filter(user=request.user, recipe=obj).exists()
+            return Favorite.objects.filter(user=request.user,
+                                           recipe=obj).exists()
         return False
 
     class Meta:

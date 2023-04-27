@@ -1,7 +1,5 @@
-from django.contrib.contenttypes.fields import (GenericForeignKey,
-                                                GenericRelation)
-from django.contrib.contenttypes.models import ContentType
 from django.db import models
+
 from users.models import User
 
 
@@ -93,20 +91,32 @@ class Favorite(models.Model):
         ]
 
 
-class ShoppingCart(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    recipes = models.ManyToManyField(Recipe, related_name='shopping_carts')
-    created_at = models.DateTimeField(auto_now_add=True)
+class Carts(models.Model):
 
-    def __str__(self):
-        return f"Корзина {self.pk} for user {self.user.username}"
+    recipe = models.ForeignKey(
+        verbose_name='Рецепты в списке покупок',
+        related_name='in_carts',
+        to=Recipe,
+        on_delete=models.CASCADE,
+    )
+    user = models.ForeignKey(
+        verbose_name='Владелец списка',
+        related_name='carts',
+        to=User,
+        on_delete=models.CASCADE,
+    )
+    date_added = models.DateTimeField(
+        verbose_name='Дата добавления',
+        auto_now_add=True,
+        editable=False
+    )
 
-    def generate_shopping_list(self):
-        shopping_list = {}
-        for recipe in self.recipes.all():
-            for ingredient in recipe.ingredients.all():
-                if ingredient.name in shopping_list:
-                    shopping_list[ingredient.name] += ingredient.amount
-                else:
-                    shopping_list[ingredient.name] = ingredient.amount
-        return shopping_list
+    class Meta:
+        verbose_name = 'Рецепт в корзине'
+        verbose_name_plural = 'Рецепты в корзине'
+        constraints = (
+            models.UniqueConstraint(
+                fields=('recipe', 'user', ),
+                name='\n%(app_label)s_%(class)s рецепт уже в корзине\n',
+            ),
+        )
