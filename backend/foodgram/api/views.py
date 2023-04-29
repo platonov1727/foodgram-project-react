@@ -1,15 +1,23 @@
 
 from django.http import HttpResponse
-from api.serializers import (FavoriteRecipeSerializer, IngredientSerializer,
-                             RecipeCreateSerializer, RecipeSerializer,
-                             TagSerializer)
-from reciepts.models import Favorite, Ingredient, Recipe, Tag, Carts
+from django.shortcuts import get_object_or_404
+
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.response import Response
-from rest_framework import status
+
+from api.serializers import (FavoriteRecipeSerializer,
+                             IngredientSerializer,
+                             RecipeCreateSerializer,
+                             RecipeSerializer,
+                             TagSerializer)
+
+from reciepts.models import (Favorite,
+                             Ingredient,
+                             Recipe,
+                             Tag,
+                             Carts)
 
 
 class TagAPIView(ModelViewSet):
@@ -47,8 +55,9 @@ class FavoriteRecipeView(APIView):
     def delete(self, request, recipe_id):
         recipe = Recipe.objects.get(id=recipe_id)
         try:
-            favorite_recipe = Favorite.objects.get(
-                user=request.user, recipe=recipe)
+            favorite_recipe = get_object_or_404(Favorite,
+                                                user=request.user,
+                                                recipe=recipe)
         except Favorite.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         favorite_recipe.delete()

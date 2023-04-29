@@ -11,13 +11,13 @@ class Tag(models.Model):
     slug = models.SlugField(verbose_name='Слаг', max_length=200,
                             unique=True)
 
+    def __str__(self):
+        return f'{self.name} цвет {self.color}'
+
     class Meta:
         verbose_name = 'Тэг'
         verbose_name_plural = 'Тэги'
         ordering = ('name', )
-
-    def __str__(self):
-        return f'{self.name} цвет {self.color}'
 
 
 class Ingredient(models.Model):
@@ -25,12 +25,12 @@ class Ingredient(models.Model):
     measurement_unit = models.CharField(
         verbose_name='Единицы измерения', max_length=10)
 
+    def __str__(self):
+        return self.name
+
     class Meta:
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
-
-    def __str__(self):
-        return self.name
 
 
 class Recipe(models.Model):
@@ -54,12 +54,12 @@ class Recipe(models.Model):
         editable=False,
     )
 
+    def __str__(self) -> str:
+        return f'{self.name}. Автор: {self.author}'
+
     class Meta:
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
-
-    def __str__(self) -> str:
-        return f'{self.name}. Автор: {self.author}'
 
 
 class IngredientRecipe(models.Model):
@@ -70,6 +70,13 @@ class IngredientRecipe(models.Model):
     amount = models.PositiveIntegerField(
         verbose_name='Количество ингридиентов')
 
+    def __str__(self):
+        return f'{self.ingredient} {self.recipe} {self.amount}'
+
+    class Meta:
+        verbose_name = 'Ингредиент рецепта'
+        verbose_name_plural = 'Ингредиенты рецепта'
+
 
 class TagRecipe(models.Model):
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE,
@@ -77,10 +84,20 @@ class TagRecipe(models.Model):
     recipe = models.ForeignKey(
         Recipe, on_delete=models.CASCADE, verbose_name='Рецепт')
 
+    def __str__(self):
+        return f'{self.tag} {self.recipe}'
+
+    class Meta:
+        verbose_name = 'Ингредиент рецепта'
+        verbose_name_plural = 'Ингредиенты рецепта'
+
 
 class Favorite(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'Пользователю {self.user} нравится {self.recipe}'
 
     class Meta:
         verbose_name = 'Избранное'
@@ -113,6 +130,9 @@ class Carts(models.Model):
         auto_now_add=True,
         editable=False
     )
+
+    def __str__(self) -> str:
+        return super().__str__()
 
     class Meta:
         verbose_name = 'Рецепт в корзине'
