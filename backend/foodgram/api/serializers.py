@@ -1,8 +1,8 @@
-import base64  
+import base64
 
 from django.core.files.base import ContentFile
 from rest_framework import serializers
-
+from django.shortcuts import get_object_or_404
 from reciepts.models import (Favorite,
                              Ingredient,
                              IngredientRecipe,
@@ -59,7 +59,8 @@ class RecipeSerializer(serializers.ModelSerializer):
     ingredients = serializers.SerializerMethodField()
     image = Base64ImageField(required=False, allow_null=True)
     author = UserRegistrationSerializer(
-        default=serializers.CurrentUserDefault())
+        default=serializers.CurrentUserDefault()
+    )
     tags = serializers.SlugRelatedField(
         queryset=Tag.objects.all(),
         slug_field='name',
@@ -127,6 +128,40 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         representation['ingredients'] = IngredientRecipeSerializer(
             IngredientRecipe.objects.filter(recipe=obj).all(), many=True).data
         return representation
+
+    def validate(self, data):
+        name = data.get('name')
+        cooking_time = data.get('cooking_time')
+        amounts = data.get('ingredients')
+        tags = data.get('tags')
+        ingredients = data.get('ingredients')
+
+        if len(name) < 1:
+            raise serializers.ValidationError({
+                'name': 'Название должно быть более 1 символа'})
+        for ingredient in ingredients:
+            if not Ingredient.objects.filter(
+                    id=ingredient['id']).exists():
+                raise serializers.ValidationError({
+                    'ingredients': f'Ингредиента \
+                    {ingredient["id"]} не существует'
+                })
+        if len(ingredients) != len(set([item['id'] for item in ingredients])):
+            raise serializers.ValidationError(
+                'Ингредиенты не могут повторяться, можете добавить количество')
+        if len(tags) != len(set([item for item in tags])):
+            raise serializers.ValidationError({
+                'tags': 'Тэги не могут повторяться!'})
+        if [item for item in amounts if item['amount'] < 1]:
+            raise serializers.ValidationError({
+                'amount': 'Количество должно быть более 0'
+            })
+        if cooking_time < 1:
+            raise serializers.ValidationError({
+                '''cooking_time': 'Время приготовления
+                 не может быть мнее 1 минуты'''
+            })
+        return data
 
     class Meta:
         model = Recipe

@@ -1,7 +1,6 @@
 
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -12,7 +11,6 @@ from api.serializers import (FavoriteRecipeSerializer,
                              RecipeCreateSerializer,
                              RecipeSerializer,
                              TagSerializer)
-
 from reciepts.models import (Favorite,
                              Ingredient,
                              Recipe,
@@ -53,36 +51,27 @@ class FavoriteRecipeView(APIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def delete(self, request, recipe_id):
-        recipe = Recipe.objects.get(id=recipe_id)
-        try:
-            favorite_recipe = get_object_or_404(Favorite,
-                                                user=request.user,
-                                                recipe=recipe)
-        except Favorite.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        recipe = get_object_or_404(Favorite, id=recipe_id)
+        favorite_recipe = get_object_or_404(Favorite,
+                                            user=request.user,
+                                            recipe=recipe)
         favorite_recipe.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class AddToCartView(APIView):
     def post(self, request, recipe_id):
-        try:
-            recipe = Recipe.objects.get(id=recipe_id)
-            cart = Carts.objects.create(recipe=recipe, user=request.user)
-            cart.save()
-            return Response(status=status.HTTP_201_CREATED)
-        except Recipe.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        recipe = get_object_or_404(Recipe, id=recipe_id)
+        cart = Carts.objects.create(recipe=recipe, user=request.user)
+        cart.save()
+        return Response(status=status.HTTP_201_CREATED)
 
 
 class RemoveFromCartView(APIView):
     def delete(self, request, recipe_id):
-        try:
-            cart = Carts.objects.get(recipe_id=recipe_id, user=request.user)
-            cart.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        except Carts.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        cart = get_object_or_404(Carts, recipe_id=recipe_id, user=request.user)
+        cart.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class DownloadShoppingCartView(APIView):

@@ -19,7 +19,8 @@ class UserRegistrationSerializer(BaseUserRegistrationSerializer):
                   'first_name',
                   'last_name',
                   'password',
-                  'id')
+                  'id',
+                  'recipes')
 
         validators = [
             UniqueTogetherValidator(
