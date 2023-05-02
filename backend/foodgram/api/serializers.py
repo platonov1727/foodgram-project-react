@@ -2,7 +2,6 @@ import base64
 
 from django.core.files.base import ContentFile
 from rest_framework import serializers
-from django.shortcuts import get_object_or_404
 from reciepts.models import (Favorite,
                              Ingredient,
                              IngredientRecipe,
@@ -23,6 +22,7 @@ class Base64ImageField(serializers.ImageField):
 
 
 class FavoriteRecipeSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Favorite
         fields = '__all__'
@@ -61,13 +61,13 @@ class RecipeSerializer(serializers.ModelSerializer):
     author = UserRegistrationSerializer(
         default=serializers.CurrentUserDefault()
     )
-    tags = serializers.SlugRelatedField(
-        queryset=Tag.objects.all(),
-        slug_field='name',
-        many=True
-    )
+    tags = TagSerializer(many=True)
     is_favorite = serializers.SerializerMethodField()
-    is_in_shopping_cart = serializers.SerializerMethodField()
+    # is_in_shopping_cart = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Recipe
+        fields = '__all__'
 
     def get_is_favorite(self, obj):
         request = self.context.get('request')
@@ -75,10 +75,6 @@ class RecipeSerializer(serializers.ModelSerializer):
             return Favorite.objects.filter(user=request.user,
                                            recipe=obj).exists()
         return False
-
-    class Meta:
-        model = Recipe
-        fields = '__all__'
 
     def get_ingredients(self, obj):
         return IngredientRecipeSerializer(
@@ -122,12 +118,12 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         instance.tags.set(tag_ids)
         return super().update(instance, validated_data)
 
-    def to_representation(self, obj):
-        self.fields.pop('ingredients')
-        representation = super().to_representation(obj)
-        representation['ingredients'] = IngredientRecipeSerializer(
-            IngredientRecipe.objects.filter(recipe=obj).all(), many=True).data
-        return representation
+    def to_representation(self, instance):
+        return RecipeSerializer(
+            instance,
+            context={
+                'request': self.context.get('request')
+            }).data
 
     def validate(self, data):
         name = data.get('name')

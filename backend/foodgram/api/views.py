@@ -6,6 +6,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
+from api.filters import IngredientFilter
+from api.paginations import CustomPageNumberPagination
 from api.serializers import (FavoriteRecipeSerializer,
                              IngredientSerializer,
                              RecipeCreateSerializer,
@@ -21,17 +23,21 @@ from reciepts.models import (Favorite,
 class TagAPIView(ModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
+    pagination_class = None
 
 
 class IngredientAPIView(ModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
+    pagination_class = None
+    filterset_class = IngredientFilter
 
 
 class RecipeAPIView(ModelViewSet):
     queryset = Recipe.objects.all()
     http_method_names = ['get', 'post', 'patch', 'delete']
     serializer_class = RecipeSerializer
+    pagination_class = CustomPageNumberPagination
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -43,6 +49,7 @@ class RecipeAPIView(ModelViewSet):
 
 
 class FavoriteRecipeView(APIView):
+
     def post(self, request, recipe_id):
         recipe = Recipe.objects.get(id=recipe_id)
         favorite_recipe = Favorite(user=request.user, recipe=recipe)

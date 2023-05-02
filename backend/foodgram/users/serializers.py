@@ -10,7 +10,7 @@ from users.validators import user_regex_validator
 
 
 class UserRegistrationSerializer(BaseUserRegistrationSerializer):
-    recipes = PrimaryKeyRelatedField(many=True, read_only=True)
+    # recipes = PrimaryKeyRelatedField(many=True, read_only=True)
 
     class Meta(BaseUserRegistrationSerializer.Meta):
         model = User
@@ -19,14 +19,13 @@ class UserRegistrationSerializer(BaseUserRegistrationSerializer):
                   'first_name',
                   'last_name',
                   'password',
-                  'id',
-                  'recipes')
+                  'id')
 
         validators = [
             UniqueTogetherValidator(
                 queryset=User.objects.all(),
-                fields=('name', 'email')
-            ), user_regex_validator
+                fields=('username', 'email')
+            )
         ]
 
     def validate(self, data):

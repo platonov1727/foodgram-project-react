@@ -60,6 +60,7 @@ class Recipe(models.Model):
     class Meta:
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
+        ordering = ('-pub_date',)
 
 
 class IngredientRecipe(models.Model):
@@ -102,7 +103,7 @@ class Favorite(models.Model):
     class Meta:
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранные'
-        ordering = ['-id']
+        ordering = ['id']
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'recipe'],
