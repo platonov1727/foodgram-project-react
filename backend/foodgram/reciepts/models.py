@@ -36,7 +36,7 @@ class Ingredient(models.Model):
 class Recipe(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE,
                                verbose_name='Автор рецепта',
-                               related_name='recipes')
+                               related_name='recipe')
     name = models.CharField(max_length=200, verbose_name='Название рецепта')
     text = models.TextField(verbose_name='Текст рецепта')
     cooking_time = models.PositiveSmallIntegerField()
@@ -119,3 +119,31 @@ class FavoriteRecipe(models.Model):
     def __str__(self):
         return (f'Пользователь: {self.user.username}'
                 f'рецепт: {self.favorite_recipe.name}')
+
+
+class ShoppingCart(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='shopping_cart',
+        verbose_name='Пользователь'
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='recipe_shopping_cart',
+        verbose_name='Рецепт'
+    )
+
+    class Meta:
+        ordering = ('id',)
+        constraints = [
+            models.UniqueConstraint(
+                fields=('user', 'recipe'),
+                name='unique recipe in shopping cart')]
+        verbose_name = 'Список покупок'
+        verbose_name_plural = 'Список покупок'
+
+    def __str__(self):
+        return (f'Пользователь: {self.user.username},'
+                f'рецепт в списке: {self.recipe.name}')

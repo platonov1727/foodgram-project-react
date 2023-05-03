@@ -6,7 +6,8 @@ from reciepts.models import (Ingredient,
                              IngredientRecipe,
                              Recipe,
                              Tag,
-                             FavoriteRecipe)
+                             FavoriteRecipe,
+                             ShoppingCart)
 from users.serializers import UserRegistrationSerializer
 
 
@@ -56,14 +57,12 @@ class RecipeSerializer(serializers.ModelSerializer):
     )
     tags = TagSerializer(many=True)
     is_favorited = serializers.SerializerMethodField()
-    # is_in_shopping_cart = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipe
-        # fields = ('id', 'tags', 'author', 'ingredients', 'is_favorited', 'is_in_shopping_cart', 'name', 'image',
-        #           'text', 'cooking_time')
         fields = ('id', 'tags', 'author', 'ingredients', 'is_favorited',
-                  'name', 'image',
+                  'is_in_shopping_cart', 'name', 'image',
                   'text', 'cooking_time')
 
     def get_ingredients(self, obj):
@@ -79,6 +78,15 @@ class RecipeSerializer(serializers.ModelSerializer):
             ).exists()
         return False
 
+    def get_is_in_shopping_cart(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return ShoppingCart.objects.filter(
+                user=request.user,
+                recipe=obj
+            ).exists()
+        return False
+
 
 class RecipeCreateSerializer(serializers.ModelSerializer):
     ingredients = serializers.ListField(child=serializers.DictField())
@@ -91,7 +99,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         ingredients_data = validated_data.pop('ingredients')
         tag_ids = validated_data.pop('tags', [])
-        recipe = super().create(validated_data)
+        recipe = Recipe.objects.create(**validated_data)
         for ingredient_data in ingredients_data:
             IngredientRecipe.objects.create(
                 recipe=recipe,
@@ -189,4 +197,34 @@ class FavoriteRecipeSerializer(serializers.ModelSerializer):
                                          favorite_recipe=recipe).exists():
             raise serializers.ValidationError({
                 'errors': 'Рецепт уже в избранном'})
+        return data
+
+
+class ShoppingCartSerializer(serializers.ModelSerializer):
+    id = serializers.ReadOnlyField(
+        source='recipe.id',
+    )
+    name = serializers.ReadOnlyField(
+        source='recipe.name',
+    )
+    image = serializers.CharField(
+        source='recipe.image',
+        read_only=True,
+    )
+    cooking_time = serializers.ReadOnlyField(
+        source='recipe.cooking_time',
+    )
+
+    class Meta:
+        model = ShoppingCart
+        fields = ('id', 'name', 'image', 'cooking_time')
+
+    def validate(self, data):
+        request = self.context.get('request')
+        user = request.user if request else None
+        recipe = self.context.get('recipe_id')
+        if user and ShoppingCart.objects.filter(user=user,
+                                                recipe=recipe).exists():
+            raise serializers.ValidationError(
+                {'errors': 'Рецепт уже добавлен в список покупок'})
         return data
