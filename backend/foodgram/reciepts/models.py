@@ -93,54 +93,29 @@ class TagRecipe(models.Model):
         verbose_name_plural = 'Ингредиенты рецепта'
 
 
-class Favorite(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return f'Пользователю {self.user} нравится {self.recipe}'
+class FavoriteRecipe(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='favorite',
+        verbose_name='Пользователь'
+    )
+    favorite_recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='favorite_recipe',
+        verbose_name='Избранный рецепт'
+    )
 
     class Meta:
-        verbose_name = 'Избранное'
-        verbose_name_plural = 'Избранные'
-        ordering = ['id']
         constraints = [
             models.UniqueConstraint(
-                fields=['user', 'recipe'],
-                name='unique_favorite_user_recipe'
-            )
-        ]
+                fields=('user', 'favorite_recipe'),
+                name='unique favourite')]
+        verbose_name = 'Избранное'
+        verbose_name_plural = 'Избранные'
+        ordering = ('id',)
 
-
-class Carts(models.Model):
-
-    recipe = models.ForeignKey(
-        verbose_name='Рецепты в списке покупок',
-        related_name='in_carts',
-        to=Recipe,
-        on_delete=models.CASCADE,
-    )
-    user = models.ForeignKey(
-        verbose_name='Владелец списка',
-        related_name='carts',
-        to=User,
-        on_delete=models.CASCADE,
-    )
-    date_added = models.DateTimeField(
-        verbose_name='Дата добавления',
-        auto_now_add=True,
-        editable=False
-    )
-
-    def __str__(self) -> str:
-        return super().__str__()
-
-    class Meta:
-        verbose_name = 'Рецепт в корзине'
-        verbose_name_plural = 'Рецепты в корзине'
-        constraints = (
-            models.UniqueConstraint(
-                fields=('recipe', 'user', ),
-                name='\n%(app_label)s_%(class)s рецепт уже в корзине\n',
-            ),
-        )
+    def __str__(self):
+        return (f'Пользователь: {self.user.username}'
+                f'рецепт: {self.favorite_recipe.name}')

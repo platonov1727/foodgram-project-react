@@ -4,12 +4,11 @@ from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 from import_export.fields import Field
 
-from reciepts.models import (Carts,
-                             Favorite,
-                             Ingredient,
+from reciepts.models import (Ingredient,
                              IngredientRecipe,
                              Recipe,
-                             Tag)
+                             Tag,
+                             FavoriteRecipe)
 
 
 class IngredientsResource(resources.ModelResource):
@@ -27,7 +26,7 @@ class IngredientsResource(resources.ModelResource):
 @admin.register(Ingredient)
 class IngredientAdmin(ImportExportModelAdmin):
     resource_class = IngredientsResource
-    list_display = ('name', 'measurement_unit',)
+    list_display = ('name', 'measurement_unit', 'id')
     search_fields = ('name',)
     empty_value_display = '-пусто-'
 
@@ -48,11 +47,6 @@ class RecipeAdmin(admin.ModelAdmin):
                     'pub_date', 'author']
 
 
-@admin.register(Favorite)
-class FavoriteAdmin(admin.ModelAdmin):
-    list_display = ['user', 'recipe']
-
-
-@admin.register(Carts)
-class CartsAdmin(admin.ModelAdmin):
-    list_display = ['user', 'recipe', 'date_added']
+@admin.register(FavoriteRecipe)
+class FavoriteRecipeAdmin(admin.ModelAdmin):
+    list_display = ['user', 'favorite_recipe']

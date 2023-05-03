@@ -1,23 +1,20 @@
 
-from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
-from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
-
+from django.shortcuts import get_object_or_404
 from api.filters import IngredientFilter
-from api.paginations import CustomPageNumberPagination
-from api.serializers import (FavoriteRecipeSerializer,
-                             IngredientSerializer,
+from api.paginations import CustomPagination
+from api.serializers import (IngredientSerializer,
                              RecipeCreateSerializer,
                              RecipeSerializer,
-                             TagSerializer)
-from reciepts.models import (Favorite,
-                             Ingredient,
+                             TagSerializer,
+                             FavoriteRecipeSerializer)
+from reciepts.models import (Ingredient,
                              Recipe,
                              Tag,
-                             Carts)
+                             FavoriteRecipe)
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework import status, viewsets, mixins
 
 
 class TagAPIView(ModelViewSet):
@@ -37,7 +34,7 @@ class RecipeAPIView(ModelViewSet):
     queryset = Recipe.objects.all()
     http_method_names = ['get', 'post', 'patch', 'delete']
     serializer_class = RecipeSerializer
-    pagination_class = CustomPageNumberPagination
+    pagination_class = CustomPagination
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -48,53 +45,39 @@ class RecipeAPIView(ModelViewSet):
         return RecipeSerializer
 
 
-class FavoriteRecipeView(APIView):
+class FavoriteRecipeViewSet(mixins.CreateModelMixin,
+                            mixins.DestroyModelMixin,
+                            viewsets.GenericViewSet):
+    serializer_class = FavoriteRecipeSerializer
 
-    def post(self, request, recipe_id):
-        recipe = Recipe.objects.get(id=recipe_id)
-        favorite_recipe = Favorite(user=request.user, recipe=recipe)
-        favorite_recipe.save()
-        serializer = FavoriteRecipeSerializer(favorite_recipe)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    def get_queryset(self):
+        user = self.request.user.id
+        return FavoriteRecipe.objects.filter(user=user)
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['recipe_id'] = self.kwargs.get('recipe_id')
+        return context
+
+    def perform_create(self, serializer):
+        serializer.save(
+            user=self.request.user,
+            favorite_recipe=get_object_or_404(
+                Recipe,
+                id=self.kwargs.get('recipe_id')
+            )
+        )
+
+    @action(methods=('delete',), detail=True)
     def delete(self, request, recipe_id):
-        recipe = get_object_or_404(Favorite, id=recipe_id)
-        favorite_recipe = get_object_or_404(Favorite,
-                                            user=request.user,
-                                            recipe=recipe)
-        favorite_recipe.delete()
+        u = request.user
+        if not u.favorite.select_related(
+                'favorite_recipe').filter(
+                    favorite_recipe_id=recipe_id).exists():
+            return Response({'errors': 'Рецепт не в избранном'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        get_object_or_404(
+            FavoriteRecipe,
+            user=request.user,
+            favorite_recipe_id=recipe_id).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class AddToCartView(APIView):
-    def post(self, request, recipe_id):
-        recipe = get_object_or_404(Recipe, id=recipe_id)
-        cart = Carts.objects.create(recipe=recipe, user=request.user)
-        cart.save()
-        return Response(status=status.HTTP_201_CREATED)
-
-
-class RemoveFromCartView(APIView):
-    def delete(self, request, recipe_id):
-        cart = get_object_or_404(Carts, recipe_id=recipe_id, user=request.user)
-        cart.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class DownloadShoppingCartView(APIView):
-    def get(self, request):
-        carts = Carts.objects.filter(user=request.user).all()
-        ingredients_dict = {}
-        for cart in carts:
-            ingredients = cart.recipe.ingredients.all()
-            for ingredient in ingredients:
-                if ingredient.name in ingredients_dict:
-                    ingredients_dict[ingredient.name] += ingredient.amount
-                else:
-                    ingredients_dict[ingredient.name] = ingredient.amount
-        file_contents = ''
-        for name, amount in ingredients_dict.items():
-            file_contents += f'{name} - {amount}\n'
-        response = HttpResponse(file_contents, content_type='text/plain')
-        response['Content-Disposition'] = 'attachment; filename=shopping_cart.txt'
-        return response
