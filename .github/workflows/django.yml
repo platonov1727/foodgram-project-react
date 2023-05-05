@@ -1,4 +1,4 @@
-name: API_yamdb deployy latestss
+name: Foodgram deployy latestss
 
 on: [push]
 jobs:
