@@ -7,7 +7,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-
+from django.db import transaction
 from api.filters import IngredientFilter, RecipesFilter
 from api.paginations import CustomPagination
 from api.serializers import (FavoriteRecipeSerializer,
@@ -42,7 +42,6 @@ class IngredientAPIView(ModelViewSet):
 class RecipeAPIView(ModelViewSet):
     queryset = Recipe.objects.all()
     http_method_names = ['get', 'post', 'patch', 'delete']
-    serializer_class = RecipeSerializer
     pagination_class = CustomPagination
     filterset_class = RecipesFilter
     permission_classes = (AllowAny,)
@@ -51,9 +50,9 @@ class RecipeAPIView(ModelViewSet):
         serializer.save(author=self.request.user)
 
     def get_serializer_class(self):
-        if self.action in ('create', 'update', 'partial_update'):
-            return RecipeCreateSerializer
-        return RecipeSerializer
+        if self.action in ('list', 'retrieve'):
+            return RecipeSerializer
+        return RecipeCreateSerializer
 
     @action(detail=False, methods=['get'],
             permission_classes=(IsAuthenticated,))

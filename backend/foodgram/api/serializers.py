@@ -4,10 +4,19 @@ from django.core.files.base import ContentFile
 from reciepts.models import (FavoriteRecipe, Ingredient, IngredientRecipe,
                              Recipe, ShoppingCart, Tag)
 from rest_framework import serializers
-from users.serializers import UserRegistrationSerializer
+from users.serializers import UserRegistrationSerializer, UserReadSerializer
 from users.models import Subscribe
+from rest_framework import status
 
 User = get_user_model()
+
+
+class ShortRecipeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Recipe
+        fields = 'id', 'name', 'image', 'cooking_time'
+        read_only_fields = '__all__',
 
 
 class Base64ImageField(serializers.ImageField):
@@ -37,6 +46,7 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 
 class IngredientRecipeSerializer(serializers.ModelSerializer):
+
     name = serializers.StringRelatedField(source='ingredient.name')
     measurement_unit = serializers.StringRelatedField(
         source='ingredient.measurement_unit')
@@ -46,6 +56,14 @@ class IngredientRecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = IngredientRecipe
         fields = ('amount', 'name', 'measurement_unit', 'id')
+
+
+class IngredientInRecipeWriteSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(write_only=True)
+
+    class Meta:
+        model = IngredientRecipe
+        fields = ('id', 'amount')
 
 
 class RecipeSerializer(serializers.ModelSerializer):
@@ -88,7 +106,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 
 class RecipeCreateSerializer(serializers.ModelSerializer):
-    ingredients = serializers.ListField(child=serializers.DictField())
+    ingredients = IngredientInRecipeWriteSerializer(many=True)
     author = serializers.HiddenField(
         default=serializers.CurrentUserDefault())
     tags = serializers.PrimaryKeyRelatedField(
@@ -236,25 +254,30 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
         return data
 
 
-class SubscriptionsSerializer(serializers.ModelSerializer):
-
-    is_subscribed = serializers.SerializerMethodField()
-    recipes = serializers.SerializerMethodField()
+class SubscriptionsSerializer(UserReadSerializer):
     recipes_count = serializers.SerializerMethodField()
+    recipes = serializers.SerializerMethodField()
 
-    class Meta:
-        model = User
-        fields = ('email', 'id',
-                  'username', 'first_name',
-                  'last_name', 'is_subscribed',
-                  'recipes', 'recipes_count')
-
-    def get_is_subscribed(self, obj):
-        return (
-            self.context.get('request').user.is_authenticated
-            and Subscribe.objects.filter(user=self.context['request'].user,
-                                         author=obj).exists()
+    class Meta(UserReadSerializer.Meta):
+        fields = UserReadSerializer.Meta.fields + (
+            'recipes_count', 'recipes'
         )
+        read_only_fields = ('email', 'username')
+
+    def validate(self, data):
+        author = self.instance
+        user = self.context.get('request').user
+        if Subscribe.objects.filter(author=author, user=user).exists():
+            raise serializers.ValidationError(
+                detail='Вы уже подписаны на этого пользователя!',
+                code=status.HTTP_400_BAD_REQUEST
+            )
+        if user == author:
+            raise serializers.ValidationError(
+                detail='Вы не можете подписаться на самого себя!',
+                code=status.HTTP_400_BAD_REQUEST
+            )
+        return data
 
     def get_recipes_count(self, obj):
         return obj.recipes.count()
@@ -265,7 +288,7 @@ class SubscriptionsSerializer(serializers.ModelSerializer):
         recipes = obj.recipes.all()
         if limit:
             recipes = recipes[:int(limit)]
-        serializer = RecipeSerializer(recipes, many=True, read_only=True)
+        serializer = ShortRecipeSerializer(recipes, many=True, read_only=True)
         return serializer.data
 
 
@@ -274,7 +297,7 @@ class SubscribeAuthorSerializer(serializers.ModelSerializer):
     email = serializers.ReadOnlyField()
     username = serializers.ReadOnlyField()
     is_subscribed = serializers.SerializerMethodField()
-    recipes = RecipeSerializer(many=True, read_only=True)
+    recipes = ShortRecipeSerializer(many=True, read_only=True)
     recipes_count = serializers.SerializerMethodField()
 
     class Meta:
