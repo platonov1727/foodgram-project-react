@@ -6,6 +6,7 @@ from api.views import (IngredientAPIView,
                        TagAPIView,
                        FavoriteRecipeViewSet,
                        ShoppingCartViewSet)
+from users.views import UserViewSet
 
 router_v1 = DefaultRouter()
 router_v1.register(r'ingredients', IngredientAPIView)
@@ -17,6 +18,8 @@ router_v1.register(
 router_v1.register(
     r'recipes/(?P<recipe_id>\d+)/shopping_cart', ShoppingCartViewSet,
     basename='shoppingcart')
+router_v1.register(r'users', UserViewSet, basename='users')
+
 
 urlpatterns = [
     path(r'', include('djoser.urls')),

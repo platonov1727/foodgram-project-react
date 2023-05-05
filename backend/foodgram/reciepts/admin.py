@@ -31,9 +31,25 @@ class IngredientAdmin(ImportExportModelAdmin):
     empty_value_display = '-пусто-'
 
 
+class TagsResource(resources.ModelResource):
+    name = Field(
+        column_name='name', attribute='name',)
+    color = Field(
+        column_name='color', attribute='color',)
+    slug = Field(attribute='slug', column_name='slug')
+    id = Field(attribute='id', column_name='id')
+
+    class Meta:
+        model = Tag
+        fields = ('id', 'name', 'color', 'slug')
+
+
 @admin.register(Tag)
-class TagAdmin(admin.ModelAdmin):
-    list_display = ['name', 'color']
+class TagAdmin(ImportExportModelAdmin):
+    resource_class = TagsResource
+    list_display = ('name', 'color', 'slug', 'id')
+    search_fields = ('name',)
+    empty_value_display = '-пусто-'
 
 
 @admin.register(IngredientRecipe)
@@ -50,3 +66,8 @@ class RecipeAdmin(admin.ModelAdmin):
 @admin.register(FavoriteRecipe)
 class FavoriteRecipeAdmin(admin.ModelAdmin):
     list_display = ['user', 'favorite_recipe']
+
+
+# @admin.register(Subscribe)
+# class SubscribeAdmin(admin.ModelAdmin):
+#     list_display = ['user', 'author']

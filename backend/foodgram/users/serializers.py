@@ -1,23 +1,25 @@
-from djoser.serializers import (
-    UserCreateSerializer as BaseUserRegistrationSerializer)
-
+from django.contrib.auth import get_user_model
+from djoser.serializers import UserCreateSerializer
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
+from users.models import Subscribe
+from djoser.serializers import UserSerializer
 
-from users.models import User
+User = get_user_model()
 
 
-class UserRegistrationSerializer(BaseUserRegistrationSerializer):
-    # recipes = PrimaryKeyRelatedField(many=True, read_only=True)
+class UserRegistrationSerializer(UserCreateSerializer):
+    is_subscribed = serializers.SerializerMethodField()
 
-    class Meta(BaseUserRegistrationSerializer.Meta):
+    class Meta(UserCreateSerializer.Meta):
         model = User
         fields = ('email',
                   'username',
                   'first_name',
                   'last_name',
                   'password',
-                  'id')
+                  'id',
+                  'is_subscribed')
 
         validators = [
             UniqueTogetherValidator(
@@ -39,3 +41,28 @@ class UserRegistrationSerializer(BaseUserRegistrationSerializer):
                 raise serializers.ValidationError(
                     'Пользователь с таким Email уже существует')
         return data
+
+    def get_is_subscribed(self, obj):
+        if (self.context.get('request')
+           and not self.context['request'].user.is_anonymous):
+            return Subscribe.objects.filter(
+                user=self.context['request'].user,
+                author=obj).exists()
+        return False
+
+
+class UserReadSerializer(UserSerializer):
+    is_subscribed = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ('email', 'id', 'username',
+                  'first_name', 'last_name',
+                  'is_subscribed')
+
+    def get_is_subscribed(self, obj):
+        if (self.context.get('request')
+           and not self.context['request'].user.is_anonymous):
+            return Subscribe.objects.filter(user=self.context['request'].user,
+                                            author=obj).exists()
+        return False

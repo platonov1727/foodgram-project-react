@@ -1,6 +1,8 @@
 from django.db import models
+from django.contrib.auth import get_user_model
 
-from users.models import User
+
+User = get_user_model()
 
 
 class Tag(models.Model):
@@ -26,7 +28,7 @@ class Ingredient(models.Model):
         verbose_name='Единицы измерения', max_length=10)
 
     def __str__(self):
-        return self.name
+        return f'{self.name} {self.measurement_unit}'
 
     class Meta:
         verbose_name = 'Ингредиент'
@@ -72,7 +74,7 @@ class IngredientRecipe(models.Model):
         verbose_name='Количество ингридиентов')
 
     def __str__(self):
-        return f'{self.ingredient} {self.recipe} {self.amount}'
+        return f'{self.ingredient} {self.recipe}'
 
     class Meta:
         verbose_name = 'Ингредиент рецепта'

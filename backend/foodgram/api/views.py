@@ -1,24 +1,29 @@
-
-from rest_framework.viewsets import ModelViewSet
-from django.shortcuts import get_object_or_404
-from api.filters import IngredientFilter
-from api.paginations import CustomPagination
-from api.serializers import (IngredientSerializer,
-                             RecipeCreateSerializer,
-                             RecipeSerializer,
-                             TagSerializer,
-                             FavoriteRecipeSerializer,
-                             ShoppingCartSerializer)
-from reciepts.models import (Ingredient,
-                             Recipe,
-                             Tag,
-                             FavoriteRecipe,
-                             ShoppingCart)
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework import status, viewsets, mixins
+from django.contrib.auth import get_user_model
 from django.db.models import Sum
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
+from rest_framework import mixins, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet
+
+from api.filters import IngredientFilter, RecipesFilter
+from api.paginations import CustomPagination
+from api.serializers import (FavoriteRecipeSerializer,
+                             IngredientSerializer,
+                             RecipeCreateSerializer,
+                             RecipeSerializer,
+                             ShoppingCartSerializer,
+                             TagSerializer)
+from reciepts.models import (FavoriteRecipe,
+                             Ingredient,
+                             IngredientRecipe,
+                             Recipe,
+                             ShoppingCart,
+                             Tag)
+
+User = get_user_model()
 
 
 class TagAPIView(ModelViewSet):
@@ -39,6 +44,8 @@ class RecipeAPIView(ModelViewSet):
     http_method_names = ['get', 'post', 'patch', 'delete']
     serializer_class = RecipeSerializer
     pagination_class = CustomPagination
+    filterset_class = RecipesFilter
+    permission_classes = (AllowAny,)
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -48,34 +55,25 @@ class RecipeAPIView(ModelViewSet):
             return RecipeCreateSerializer
         return RecipeSerializer
 
-    @action(
-        detail=False,
-        methods=('get',),
-        url_path='download_shopping_cart',
-        pagination_class=None)
-    def download_file(self, request):
-        user = request.user
-        if not user.shopping_cart.exists():
-            return Response(
-                'В корзине нет товаров', status=status.HTTP_400_BAD_REQUEST)
-
-        text = 'Список покупок:\n\n'
-        ingredient_name = 'recipe__recipe__ingredient__name'
-        ingredient_unit = 'recipe__recipe__ingredient__measurement_unit'
-        recipe_amount = 'recipe__recipe__amount'
-        amount_sum = 'recipe__recipe__amount__sum'
-        cart = user.shopping_cart.select_related('recipe').values(
-            ingredient_name, ingredient_unit).annotate(Sum(
-                recipe_amount)).order_by(ingredient_name)
-        for _ in cart:
-            text += (
-                f'{_[ingredient_name]} ({_[ingredient_unit]})'
-                f' — {_[amount_sum]}\n'
-            )
-        response = HttpResponse(text, content_type='text/plain')
-        filename = 'shopping_list.txt'
-        response['Content-Disposition'] = f'attachment; filename={filename}'
-        return response
+    @action(detail=False, methods=['get'],
+            permission_classes=(IsAuthenticated,))
+    def download_shopping_cart(self, request, **kwargs):
+        ingredients = (
+            IngredientRecipe.objects
+            .filter(recipe__recipe_shopping_cart__user=request.user)
+            .values('ingredient')
+            .annotate(total_amount=Sum('amount'))
+            .values_list('ingredient__name', 'total_amount',
+                         'ingredient__measurement_unit')
+        )
+        file_list = []
+        [file_list.append(
+            '{} - {} {}.'.format(*ingredient)) for ingredient in ingredients]
+        file = HttpResponse('Cписок покупок:\n' + '\n'.join(file_list),
+                            content_type='text/plain')
+        file['Content-Disposition'] = (
+            f'attachment; filename=''список покупок.txt''')
+        return file
 
 
 class FavoriteRecipeViewSet(mixins.CreateModelMixin,
