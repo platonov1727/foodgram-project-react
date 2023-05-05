@@ -3,7 +3,7 @@ services:
 
   frontend:
     container_name: foodgram-front
-    image: platonov1727/foodgram-front:latest
+    image: platonov1727/foodgram_frontend:latest
     # build: ../frontend/
     volumes: 
       - ./frontend/:/app/result_build/
