@@ -42,7 +42,7 @@ services:
       - media_dir:/etc/nginx/html/media/
     depends_on:
       - backend
-      # - frontend
+      - frontend
 
 volumes:
   static_dir:
