@@ -7,7 +7,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv(
     'SECRET_KEY', default='django-insecure-lqyo)%^r82#35g6-r(2=0$%pde1&ca&k1aw1kn_4zn5y*0tv!j')
 
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -59,7 +59,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'foodgram.wsgi.application'
 
-if DEBUG is True:
+if DEBUG is False:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
