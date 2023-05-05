@@ -1,12 +1,17 @@
 import base64
+
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
-from reciepts.models import (FavoriteRecipe, Ingredient, IngredientRecipe,
-                             Recipe, ShoppingCart, Tag)
-from rest_framework import serializers
-from users.serializers import UserRegistrationSerializer, UserReadSerializer
+from rest_framework import serializers, status
+
+from reciepts.models import (FavoriteRecipe,
+                             Ingredient,
+                             IngredientRecipe,
+                             Recipe,
+                             ShoppingCart,
+                             Tag)
 from users.models import Subscribe
-from rest_framework import status
+from users.serializers import UserReadSerializer, UserRegistrationSerializer
 
 User = get_user_model()
 
@@ -279,9 +284,6 @@ class SubscriptionsSerializer(UserReadSerializer):
             )
         return data
 
-    def get_recipes_count(self, obj):
-        return obj.recipes.count()
-
     def get_recipes(self, obj):
         request = self.context.get('request')
         limit = request.GET.get('recipes_limit')
@@ -290,6 +292,9 @@ class SubscriptionsSerializer(UserReadSerializer):
             recipes = recipes[:int(limit)]
         serializer = ShortRecipeSerializer(recipes, many=True, read_only=True)
         return serializer.data
+
+    def get_recipes_count(self, obj):
+        return obj.recipes.count()
 
 
 class SubscribeAuthorSerializer(serializers.ModelSerializer):

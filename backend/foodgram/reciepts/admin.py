@@ -60,14 +60,10 @@ class IngredientRecipeAdmin(admin.ModelAdmin):
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     list_display = ['name', 'cooking_time',
-                    'pub_date', 'author']
+                    'pub_date', 'author', 'id']
 
 
 @admin.register(FavoriteRecipe)
 class FavoriteRecipeAdmin(admin.ModelAdmin):
     list_display = ['user', 'favorite_recipe']
 
-
-# @admin.register(Subscribe)
-# class SubscribeAdmin(admin.ModelAdmin):
-#     list_display = ['user', 'author']

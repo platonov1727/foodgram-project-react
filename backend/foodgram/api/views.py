@@ -1,3 +1,4 @@
+
 from django.contrib.auth import get_user_model
 from django.db.models import Sum
 from django.http import HttpResponse
@@ -7,7 +8,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-from django.db import transaction
+
 from api.filters import IngredientFilter, RecipesFilter
 from api.paginations import CustomPagination
 from api.serializers import (FavoriteRecipeSerializer,
@@ -68,8 +69,11 @@ class RecipeAPIView(ModelViewSet):
         file_list = []
         [file_list.append(
             '{} - {} {}.'.format(*ingredient)) for ingredient in ingredients]
-        file = HttpResponse('Cписок покупок:\n' + '\n'.join(file_list),
-                            content_type='text/plain')
+        file = HttpResponse(
+            'Cписок покупок:\n'
+            + '\n'.join(file_list) + '\n' + 'Приятного аппетита',
+            content_type='text/plain'
+        )
         file['Content-Disposition'] = (
             f'attachment; filename=''список покупок.txt''')
         return file
@@ -139,7 +143,7 @@ class ShoppingCartViewSet(mixins.CreateModelMixin,
         if not user.shopping_cart.select_related(
                 'recipe').filter(
                     recipe_id=recipe_id).exists():
-            return Response({'errors': 'Рецепта нет в корзине'},
+            return Response({'errors': 'В корзине нет рецепта'},
                             status=status.HTTP_400_BAD_REQUEST)
         get_object_or_404(
             ShoppingCart,

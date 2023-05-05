@@ -1,6 +1,12 @@
 from django.contrib import admin
-from users.models import User, Subscribe
+from users.models import Subscribe, User
 
-admin.site.register(User)
-admin.site.register(Subscribe)
 
+@admin.register(User)
+class UserAdmin(admin.ModelAdmin):
+    list_display = ['id', 'email', 'username', 'first_name', 'last_name']
+
+
+@admin.register(Subscribe)
+class SubscribeAdmin(admin.ModelAdmin):
+    list_display = ['id', 'user', 'author']
