@@ -18,7 +18,7 @@ services:
 
   backend:
     container_name: foodgram-app
-    image: platonov1727/foodgram-backend:latest
+    image: platonov1727/foodgram_backend:latest
     # build: ../backend/foodgram
     restart: always
     volumes:
