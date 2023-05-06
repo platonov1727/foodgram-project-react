@@ -1,4 +1,4 @@
-name: Foodgram deploy
+name: Foodgram deploy!
 
 on: [push]
 jobs:
@@ -78,7 +78,7 @@ jobs:
   send_message:
     name: Notification to telegram
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
+
     needs: deploy
     steps:
     - name: send message
