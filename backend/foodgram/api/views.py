@@ -31,6 +31,7 @@ class TagAPIView(ModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     pagination_class = None
+    permission_classes = (AllowAny,)
 
 
 class IngredientAPIView(ModelViewSet):
@@ -38,6 +39,7 @@ class IngredientAPIView(ModelViewSet):
     serializer_class = IngredientSerializer
     pagination_class = None
     filterset_class = IngredientFilter
+    permission_classes = (AllowAny,)
 
 
 class RecipeAPIView(ModelViewSet):
