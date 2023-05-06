@@ -115,7 +115,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     author = serializers.HiddenField(
         default=serializers.CurrentUserDefault())
     tags = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=Tag.objects.all(), default=None)
+        many=True, queryset=Tag.objects.all(), default=False)
     image = Base64ImageField(required=False, allow_null=True)
 
     def create(self, validated_data):
