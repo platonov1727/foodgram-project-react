@@ -1,4 +1,4 @@
-[![API_yamdb deployy latest](https://github.com/platonov1727/yamdb_final/actions/workflows/yamdb_workflow.yml/badge.svg)](https://github.com/platonov1727/yamdb_final/actions/workflows/yamdb_workflow.yml)
+[![Foodgram deployy latestss](https://github.com/platonov1727/foodgram-project-react/actions/workflows/django.yml/badge.svg)](https://github.com/platonov1727/foodgram-project-react/actions/workflows/django.yml)
 
 # Фудграмм - дипломный проект
 
@@ -14,7 +14,6 @@
 
 - Аутентификация по токену
 - возможность ознакомиться с рецептами без аутентификации
-
 
 ## Технологии
 
@@ -80,4 +79,3 @@ sudo docker-compose exec yamdb python manage.py collectstatic --no-input
 ```code
 sudo docker-compose exec yamdb python manage.py createsuperuser --username admin --email 'admin@yamdb.com'
 ```
-
