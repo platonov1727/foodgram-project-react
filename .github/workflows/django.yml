@@ -70,7 +70,11 @@ jobs:
           sudo echo DB_HOST=${{ secrets.DB_HOST }} >> .env
           sudo echo DB_PORT=${{ secrets.DB_PORT }} >> .env
           sudo docker-compose up -d --build
-
+          sudo docker-compose exec -it 
+          sudo docker exec -it foodgram-app python manage.py makemigrations
+          sudo docker exec -it foodgram-app python manage.py migrate
+          sudo docker exec -it foodgram-app python manage.py collectstatic --noinput --clear
+          
   send_message:
     name: Notification to telegram
     runs-on: ubuntu-latest
