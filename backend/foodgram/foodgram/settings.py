@@ -130,8 +130,8 @@ DJOSER = {
     'USER_ID_FIELD': 'id',
     'SERIALIZERS': {
         'user_create': 'users.serializers.UserRegistrationSerializer',
-        'user': 'users.serializers.UserRegistrationSerializer',
-        'current_user': 'users.serializers.UserRegistrationSerializer'
+        'user': 'users.serializers.UserSerializer',
+        'current_user': 'users.serializers.UserSerializerr'
     },
     'HIDE_USERS': False,
     'PERMISSIONS': {
