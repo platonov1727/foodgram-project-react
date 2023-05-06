@@ -21,7 +21,7 @@ jobs:
       run: |
         python -m flake8
         pytest
-        cd backend/
+        cd backend/foodgram/
         python manage.py test
 
   build_and_push_to_docker_hub:
