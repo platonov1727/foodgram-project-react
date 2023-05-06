@@ -143,4 +143,3 @@ DJOSER = {
 
 IMPORT_EXPORT_USE_TRANSACTIONS = True
 AUTH_USER_MODEL = 'users.User'
-#gadsgkj;asdkgj

@@ -77,7 +77,7 @@ class RecipeAPIView(ModelViewSet):
             content_type='text/plain'
         )
         file['Content-Disposition'] = (
-            f'attachment; filename=''список покупок.txt''')
+            'attachment; filename=''список покупок.txt''')
         return file
 
 
