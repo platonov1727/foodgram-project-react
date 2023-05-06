@@ -22,6 +22,5 @@ router_v1.register(r'users', UserViewSet, basename='users')
 
 
 urlpatterns = [
-    path(r'', include('djoser.urls')),
     path('', include(router_v1.urls)),
 ]
