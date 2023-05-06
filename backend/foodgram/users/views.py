@@ -41,6 +41,7 @@ class UserViewSet(DjoserViewSet):
                               author=author).delete()
             return Response({'detail': 'Успешная отписка'},
                             status=status.HTTP_204_NO_CONTENT)
+        return None
 
     @action(
         detail=False,

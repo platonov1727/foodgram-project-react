@@ -168,8 +168,8 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             if not Ingredient.objects.filter(
                     id=ingredient['id']).exists():
                 raise serializers.ValidationError({
-                    'ingredients': f'Ингредиента \
-                    {ingredient["id"]} не существует'
+                    'ingredients': f'''Ингредиента{ingredient["id"]}
+                      не существует'''
                 })
         if len(ingredients) != len(set([item['id'] for item in ingredients])):
             raise serializers.ValidationError(
@@ -191,8 +191,9 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     def get_is_favorited(self, obj):
         return (
             self.context.get('request').user.is_authenticated
-            and FavoriteRecipe.objects.filter(user=self.context['request'].user,
-                                              recipe=obj).exists()
+            and FavoriteRecipe.objects.filter(
+                user=self.context['request'].user,
+                recipe=obj).exists()
         )
 
     class Meta:
