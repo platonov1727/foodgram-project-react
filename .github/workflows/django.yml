@@ -1,4 +1,4 @@
-name: Foodgram deployy
+name: Foodgram deploy
 
 on: [push]
 jobs:
