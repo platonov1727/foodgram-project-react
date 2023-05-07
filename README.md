@@ -1,8 +1,10 @@
 [![Foodgram deployy latestss](https://github.com/platonov1727/foodgram-project-react/actions/workflows/django.yml/badge.svg)](https://github.com/platonov1727/foodgram-project-react/actions/workflows/django.yml)
 
 # 62.84.123.55
+'''
 login: platonov1727@yandex.ry
 password: 123
+'''
 
 # Фудграмм - дипломный проект
 
