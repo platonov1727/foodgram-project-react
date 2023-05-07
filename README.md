@@ -24,7 +24,7 @@ password: backend
 
 ## Технологии
 
-- Django==3.2
+- Django==4.2
 - django-filter==22.1
 - django-import-export==3.0.2
 - djangorestframework==3.12.4
