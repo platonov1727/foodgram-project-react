@@ -182,10 +182,10 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
                 'amount': 'Количество должно быть более 0'
             })
         if cooking_time < 1:
-            raise serializers.ValidationError({
-                '''cooking_time': 'Время приготовления
-                 не может быть мнее 1 минуты'''
-            })
+            raise serializers.ValidationError(
+                '''Время приготовления
+                должно быть более 1 минуты'''
+            )
         return data
 
     def get_is_favorited(self, obj):

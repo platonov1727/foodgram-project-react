@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from api.paginations import CustomPagination
 from api.serializers import SubscribeAuthorSerializer, SubscriptionsSerializer
 from users.models import Subscribe
-from users.serializers import UserReadSerializer, UserRegistrationSerializer
+from users.serializers import UserRegistrationSerializer
 
 User = get_user_model()
 
@@ -17,6 +17,7 @@ User = get_user_model()
 class UserViewSet(DjoserViewSet):
     queryset = User.objects.all()
     pagination_class = CustomPagination
+    serializer_class = UserRegistrationSerializer
 
     def get_permission_classes(self):
         if self.request.method == 'GET':
@@ -25,11 +26,6 @@ class UserViewSet(DjoserViewSet):
             return IsAuthenticated
         else:
             return []
-
-    def get_serializer_class(self):
-        if self.action in ('list', 'retrieve'):
-            return UserReadSerializer
-        return UserRegistrationSerializer
 
     @action(detail=True, methods=['post', 'delete'],
             permission_classes=(IsAuthenticated,))

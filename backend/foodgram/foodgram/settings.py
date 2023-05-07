@@ -131,7 +131,7 @@ DJOSER = {
     'SERIALIZERS': {
         'user_create': 'users.serializers.UserRegistrationSerializer',
         'user': 'users.serializers.UserSerializer',
-        'current_user': 'users.serializers.UserSerializerr'
+        'current_user': 'users.serializers.UserSerializer'
     },
     'HIDE_USERS': False,
     'PERMISSIONS': {
